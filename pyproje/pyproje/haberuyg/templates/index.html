@@ -1,0 +1,335 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero">
+    <div>
+        <h2>Güncel Haberleri Tek Yerden Takip Et</h2>
+        <p>Teknoloji, spor, ekonomi ve sağlık haberlerini anlık olarak görüntüleyebilir, beğendiğin haberleri favorilerine ekleyebilirsin.</p>
+    </div>
+
+    <div class="hero-highlights">
+        <div>
+            <strong>Canlı</strong>
+            <span>NewsAPI</span>
+        </div>
+        <div>
+            <strong>Akıllı</strong>
+            <span>Arama</span>
+        </div>
+        <div>
+            <strong>Kişisel</strong>
+            <span>Favoriler</span>
+        </div>
+    </div>
+</section>
+
+<form method="GET" action="/" class="search-form">
+    <input
+        type="text"
+        name="search"
+        placeholder="Haber başlığı ara..."
+        value="{{ search }}"
+    >
+    <button type="submit">Ara</button>
+</form>
+
+<div class="category-toolbar">
+    <div class="categories">
+        <a class="{% if category == '' %}active-category{% endif %}" href="/">Tümü</a>
+        <a class="{% if category == 'technology' %}active-category{% endif %}" href="/?category=technology">Teknoloji</a>
+        <a class="{% if category == 'sports' %}active-category{% endif %}" href="/?category=sports">Spor</a>
+        <a class="{% if category == 'business' %}active-category{% endif %}" href="/?category=business">Ekonomi</a>
+        <a class="{% if category == 'health' %}active-category{% endif %}" href="/?category=health">Sağlık</a>
+        <a class="{% if category == 'science' %}active-category{% endif %}" href="/?category=science">Bilim</a>
+    </div>
+
+    <div class="home-tools">
+        {% if hidden_count > 0 %}
+            <a class="restore-hidden-btn" href="/gizlenen-haberler">
+                Gizlenenler ({{ hidden_count }})
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if articles|length == 0 %}
+    <div class="empty-box empty-news-state">
+        <h2>Haber bulunamadı</h2>
+        <p>Arama kelimesini değiştirebilir, tüm haberlere dönebilir veya gizlenen haberleri geri getirebilirsin.</p>
+
+        <div class="empty-actions">
+            <a href="/">Tüm Haberlere Dön</a>
+            {% if search %}
+                <a href="{{ url_for('index', category=category, view=view) }}">Aramayı Temizle</a>
+            {% endif %}
+            {% if hidden_count > 0 %}
+                <a href="/gizlenen-haberler">
+                    Gizlenenler
+                </a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+{% if hidden_count and hidden_count > 0 %}
+<div style="width: 100%; padding: 0 20px; margin-bottom: 15px; box-sizing: border-box; clear: both; text-align: right;">
+    <a href="/gizlenen-haberler" style="display: inline-block; background: #e74c3c; color: white; padding: 6px 12px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        👁️ Gizlenen Haberleri Yönet ({{ hidden_count }})
+    </a>
+</div>
+{% endif %}
+
+<div class="news-container" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px; padding: 20px; width: 100%; box-sizing: border-box; clear: both;">
+    {% for article in articles %}
+        <div class="news-card" style="display: flex; flex-direction: column; background: #1e1e1e; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 15px; box-sizing: border-box; height: 100%;">
+            
+            {% if article.urlToImage %}
+                <img src="{{ article.urlToImage if article.urlToImage else '/static/no-image.jpg' }}" onerror="this.src='/static/no-image.jpg'" alt="Haber Resmi" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">
+            {% endif %}
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span class="badge" style="background: #2ecc71; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">
+                    {{ article.source.name if article.source and article.source.name else (article.source if article.source is string else 'Haber') }}
+                </span>
+                <span style="font-size: 11px; color: #777;">{{ article.publishedAt[:10] if article.publishedAt else '' }}</span>
+            </div>
+
+            <h3 style="font-size: 16px; margin: 0 0 10px 0; color: #fff; line-height: 1.4; font-weight: bold;">{{ article.title }}</h3>
+            
+            <p style="font-size: 13px; color: #aaa; line-height: 1.5; margin: 0 0 15px 0; flex-grow: 1;">
+                {% if article.description %}
+                    {{ article.description[:120] }}...
+                {% else %}
+                    Bu haber için kısa açıklama bulunmamaktadır.
+                {% endif %}
+            </p>
+
+            <div style="display: flex; flex-direction: column; width: 100%; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;">
+                
+                <a href="{{ url_for('haber_detay', title=article.title, description=article.description, image=article.urlToImage, url=article.url) }}" style="display: block; width: 100%; background: #3498db; color: white; padding: 10px 0; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; text-align: center; box-sizing: border-box;">
+                    Detayları Gör
+                </a>
+
+                <div class="reaction-container" style="display: flex; justify-content: space-around; width: 100%; align-items: center; padding: 5px 0; box-sizing: border-box;">
+                    <form class="like-form" action="/like" method="POST" style="margin: 0;">
+                        <input type="hidden" name="url" value="{{ article.url }}">
+                        {% if likes_map and article.url in likes_map and likes_map[article.url]['user_liked'] == 1 %}
+                            <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 4px; color: #2ecc71;">
+                                <span class="like-count">👍 {{ likes_map[article.url]['likes'] if likes_map and article.url in likes_map else 0 }}</span>
+                            </button>
+                        {% else %}
+                            <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 4px; color: #666;">
+                                <span class="like-count">👍 {{ likes_map[article.url]['likes'] if likes_map and article.url in likes_map else 0 }}</span>
+                            </button>
+                        {% endif %}
+                    </form>
+
+                    <form class="dislike-form" action="/dislike" method="POST" style="margin: 0;">  
+                        <input type="hidden" name="url" value="{{ article.url }}">
+                        {% if likes_map and article.url in likes_map and likes_map[article.url]['user_disliked'] == 1 %}
+                            <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 4px; color: #e74c3c;">
+                                <span class="dislike-count">👎 {{ likes_map[article.url]['dislikes'] if likes_map and article.url in likes_map else 0 }}</span>
+                            </button>
+                        {% else %}
+                            <button type="submit" style="background: none; border: none; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 4px; color: #666;">
+                                <span class="dislike-count">👎 {{ likes_map[article.url]['dislikes'] if likes_map and article.url in likes_map else 0 }}</span>
+                            </button>
+                        {% endif %}
+                    </form>
+
+                    <form class="favorite-form">
+                        <input type="hidden" name="title" value="{{ article.title }}">
+                        <input type="hidden" name="description" value="{{ article.description }}">
+                        <input type="hidden" name="image_url" value="{{ article.urlToImage }}">
+                        <input type="hidden" name="url" value="{{ article.url }}">
+
+                        <button type="submit" class="favorite-btn" style="background:#f1c40f; border:none; color:#111; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; font-weight:bold;">
+                            ⭐ Favorine Ekle
+                        </button>
+                    </form>
+                    
+                    <form class="hide-form" action="/hide_article" method="POST" style="margin: 0; display: inline;">
+                        <input type="hidden" name="url" value="{{ article.url }}">
+                        <input type="hidden" name="title" value="{{ article.title }}">
+                        <input type="hidden" name="description" value="{{ article.description }}">
+                        <input type="hidden" name="image" value="{{ article.urlToImage }}">
+                        <button type="submit" style="background: none; border: 1px solid #444; color: #888; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                            Gizle
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div id="newsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <img id="modalImage" class="modal-image">
+        <div class="modal-body">
+            <div class="news-meta">
+                <span id="modalSource"></span>
+                <span id="modalDate"></span>
+            </div>
+            <h2 id="modalTitle"></h2>
+            <p id="modalDescription"></p>
+            <a id="modalUrl" href="#" target="_blank" class="modal-link">Haberi Oku</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(title, description, image, url, source, date){
+        document.getElementById("modalTitle").innerText = title;
+        document.getElementById("modalDescription").innerText = description || "Bu haber için açıklama bulunmamaktadır.";
+        document.getElementById("modalSource").innerText = source || "Kaynak yok";
+        document.getElementById("modalDate").innerText = date || "Tarih yok";
+        document.getElementById("modalUrl").href =
+            "/read?title=" + encodeURIComponent(title) +
+            "&url=" + encodeURIComponent(url) +
+            "&source=" + encodeURIComponent(source || "Kaynak yok");
+
+        const modalImage = document.getElementById("modalImage");
+
+        if(image && image !== "None"){
+            modalImage.src = image;
+            modalImage.style.display = "block";
+        }else{
+            modalImage.style.display = "none";
+        }
+
+        document.getElementById("newsModal").style.display = "flex";
+    }
+
+    function closeModal(){
+        document.getElementById("newsModal").style.display = "none";
+    }
+
+    window.onclick = function(event){
+        const modal = document.getElementById("newsModal");
+        if(event.target === modal){
+            closeModal();
+        }
+    }
+</script>
+
+<script>
+const userSession = "{{ session.get('user_id', '') }}";
+
+async function handleReaction(e, endpoint) {
+    e.preventDefault();
+    
+    if (!userSession) {
+        alert("Lütfen önce giriş yapınız!");
+        return;
+    }
+
+    const form = e.target;
+    
+    try {
+        const response = await fetch(endpoint, {
+            method: "POST",
+            body: new FormData(form)
+        });
+
+        const data = await response.json();
+
+        if (data.success === false) {
+            alert(data.message);
+            return;
+        }
+
+        const container = form.parentElement;
+        const likeSpan = container.querySelector(".like-count");
+        const dislikeSpan = container.querySelector(".dislike-count");
+        const likeBtn = container.querySelector(".like-form button");
+        const dislikeBtn = container.querySelector(".dislike-form button");
+
+        if (data.likes !== undefined && likeSpan) {
+            likeSpan.innerHTML = "👍 " + data.likes;
+        }
+        if (data.dislikes !== undefined && dislikeSpan) {
+            dislikeSpan.innerHTML = "👎 " + data.dislikes;
+        }
+
+        if (likeBtn && dislikeBtn) {
+            if (data.user_liked === 1 || data.user_liked === true) {
+                likeBtn.style.color = "#2ecc71"; 
+                dislikeBtn.style.color = "#666"; 
+            } else if (data.user_disliked === 1 || data.user_disliked === true) {
+                likeBtn.style.color = "#666"; 
+                dislikeBtn.style.color = "#e74c3c"; 
+            } else {
+                likeBtn.style.color = "#666"; 
+                dislikeBtn.style.color = "#666";
+            }
+        }
+
+    } catch (err) {
+        console.error("Reaksiyon hatası:", err);
+    }
+}
+
+document.querySelectorAll(".like-form").forEach(form => {
+    form.addEventListener("submit", (e) => handleReaction(e, "/like"));
+});
+
+document.querySelectorAll(".dislike-form").forEach(form => {
+    form.addEventListener("submit", (e) => handleReaction(e, "/dislike"));
+});
+</script>
+
+<script>
+document.querySelectorAll(".favorite-form").forEach(form => {
+    form.addEventListener("submit", async function(e){
+        e.preventDefault();
+        
+        if (!userSession) {
+            alert("Lütfen önce giriş yapınız!");
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        const response = await fetch("/add_favorite", {
+            method: "POST",
+            body: formData
+        });
+
+        if(response.ok){
+            const data = await response.json();
+            const button = form.querySelector(".favorite-btn");
+
+            if(data.favorited){
+                button.innerHTML = "⭐ Kaydedildi";
+                button.style.background = "#2ecc71";
+            }else{
+                button.innerHTML = "⭐ Favorine Ekle";
+                button.style.background = "#f1c40f";
+            }
+
+            button.style.transform = "scale(1.12)";
+            button.style.transition = "0.15s";
+
+            setTimeout(() => {
+                button.style.transform = "scale(1)";
+            }, 150);
+        }
+    });
+});
+</script>
+
+<script>
+document.querySelectorAll(".hide-form").forEach(form => {
+    form.addEventListener("submit", function(e) {
+        if (!userSession) {
+            e.preventDefault(); 
+            alert("Lütfen önce giriş yapınız!");
+        }
+    });
+});
+</script>
+
+{% endblock %}

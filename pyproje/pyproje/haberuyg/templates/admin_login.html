@@ -1,0 +1,251 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="corporate-admin-container fade-in">
+    <div class="corporate-admin-card">
+        
+        <div class="admin-card-top-bar"></div>
+
+        <div class="corporate-admin-header">
+            <div class="admin-lock-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2>Sistem Yönetim Paneli</h2>
+            <p>Lütfen devam etmek için yetkili erişim şifrenizi ve kullanıcı adınızı giriniz.</p>
+        </div>
+
+        <form method="POST" class="corporate-admin-form">
+            
+            <div class="corporate-form-group">
+                <label for="username"><i class="fa-solid fa-user-gear"></i> Yönetici Adı</label>
+                <input 
+                    type="text" 
+                    id="username"
+                    name="username" 
+                    placeholder="Örn: admin" 
+                    required
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="corporate-form-group password-field-container">
+                <label for="adminPassword"><i class="fa-solid fa-key"></i> Giriş Şifresi</label>
+                <div class="input-with-button">
+                    <input 
+                        id="adminPassword" 
+                        type="password" 
+                        name="password" 
+                        placeholder="••••••••" 
+                        required
+                    >
+                    <button 
+                        type="button" 
+                        class="corporate-toggle-btn" 
+                        onclick="togglePasswordVisibility('adminPassword', this)" 
+                        aria-label="Şifreyi göster"
+                    >
+                        <i class="fa-regular fa-eye eye-main-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-corporate-admin">
+                <i class="fa-solid fa-lock-open"></i> Yetkili Girişi Yap
+            </button>
+
+            <div class="corporate-admin-footer">
+                <a href="/login" class="back-to-site">
+                    <i class="fa-solid fa-arrow-left-long"></i> Ana Siteye / Kullanıcı Girişine Dön
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<style>
+    :root {
+        --adm-bg: #f1f5f9;
+        --adm-card: #ffffff;
+        --adm-text-dark: #1e293b;
+        --adm-text-muted: #64748b;
+        --adm-border: #cbd5e1;
+        --adm-primary: #1e3a8a; /* Klasik Kurumsal Lacivert */
+        --adm-primary-hover: #172554;
+    }
+
+    body.dark-mode {
+        --adm-bg: #0f172a;
+        --adm-card: #1e293b;
+        --adm-text-dark: #f8fafc;
+        --adm-text-muted: #94a3b8;
+        --adm-border: #475569;
+        --adm-primary: #3b82f6; /* Koyu modda göz yormayan mavi */
+        --adm-primary-hover: #2563eb;
+    }
+
+    .corporate-admin-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 75vh;
+        padding: 40px 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .corporate-admin-card {
+        background: var(--adm-card);
+        border: 1px solid var(--adm-border);
+        width: 100%;
+        max-width: 420px;
+        border-radius: 8px; /* Hocaların sevdiği daha nizami, az oval hatlar */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        overflow: hidden; /* Üst şeridin taşmaması için */
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    /* Üst taraftaki kurumsal lacivert/mavi şerit */
+    .admin-card-top-bar {
+        height: 5px;
+        background: var(--adm-primary);
+    }
+
+    .corporate-admin-header {
+        text-align: center;
+        padding: 35px 35px 20px 35px;
+    }
+
+    .admin-lock-icon {
+        font-size: 32px;
+        color: var(--adm-primary);
+        margin-bottom: 12px;
+    }
+
+    .corporate-admin-header h2 {
+        font-size: 21px;
+        font-weight: 700;
+        color: var(--adm-text-dark);
+        margin: 0 0 8px 0;
+    }
+
+    .corporate-admin-header p {
+        font-size: 13px;
+        color: var(--adm-text-muted);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .corporate-admin-form {
+        padding: 0 35px 35px 35px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .corporate-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .corporate-form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--adm-text-dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .corporate-form-group input {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid var(--adm-border);
+        border-radius: 6px;
+        background: var(--adm-card);
+        color: var(--adm-text-dark);
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .corporate-form-group input:focus {
+        border-color: var(--adm-primary);
+    }
+
+    /* Şifre alanı buton yerleşimi */
+    .input-with-button {
+        position: relative;
+    }
+
+    .input-with-button input {
+        padding-right: 40px;
+    }
+
+    .corporate-toggle-btn {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: var(--adm-text-muted);
+        cursor: pointer;
+        padding: 2px;
+    }
+
+    .corporate-toggle-btn.password-visible .eye-main-icon::before {
+        content: "\f070"; /* Şifre açıkken göze çizgi çeker */
+    }
+
+    /* Kurumsal Ağır Giriş Butonu */
+    .btn-corporate-admin {
+        background: var(--adm-primary);
+        color: #ffffff !important;
+        border: none;
+        padding: 13px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: background-color 0.2s;
+        margin-top: 5px;
+    }
+
+    .btn-corporate-admin:hover {
+        background: var(--adm-primary-hover);
+    }
+
+    .corporate-admin-footer {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .back-to-site {
+        font-size: 12.5px;
+        color: var(--adm-text-muted) !important;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.2s;
+    }
+
+    .back-to-site:hover {
+        color: var(--adm-primary) !important;
+        text-decoration: underline;
+    }
+
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+{% endblock %}

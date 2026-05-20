@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='favicon.jpg') }}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ url_for('static', filename='favicon.jpg') }}">
+    <title>Haber Merkezi</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <nav>
+
+        <a class="nav-brand" href="/">
+            <img src="{{ url_for('static', filename='favicon.jpg') }}" alt="Haber Merkezi">
+            <h1>Haber Merkezi</h1>
+        </a>
+
+        <div class="menu">
+            <button class="theme-toggle" onclick="toggleTheme()" type="button" id="themeButton">
+                🌙
+            </button>
+
+            <span>|</span>
+
+            <a href="/">Ana Sayfa</a>
+
+            <span>|</span>
+
+            {% if session.get("admin") %}
+
+                <a href="/admin_panel">Yönetici Paneli</a>
+
+            {% elif session.get("user_id") %}
+
+                <a href="/profile">{{ session.get("username") }}</a>
+
+                <span>|</span>
+
+                <a href="/logout">Çıkış Yap</a>
+
+            {% else %}
+
+                <a href="/login">Giriş Yap</a>
+
+                <span>|</span>
+
+                <a href="/register">Kayıt Ol</a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+    <div class="container">
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+
+                {% for message in messages %}
+                    <div class="flash-message">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+    </div>
+
+</body>
+<footer>
+
+    <p>
+        Haber Merkezi © 2026 - Tüm Hakları Saklıdır
+    </p>
+
+</footer>
+
+<script>
+
+    setTimeout(() => {
+
+        const flashMessages = document.querySelectorAll(".flash-message");
+
+        flashMessages.forEach(message => {
+
+            message.style.opacity = "0";
+
+            setTimeout(() => {
+                message.remove();
+            }, 500);
+
+        });
+
+    }, 5000);
+
+
+    function toggleTheme(){
+
+        document.body.classList.toggle("dark-mode");
+
+        const button = document.getElementById("themeButton");
+
+        if(document.body.classList.contains("dark-mode")){
+
+            localStorage.setItem("theme", "dark");
+
+            button.innerHTML = "☀️";
+
+        }else{
+
+            localStorage.setItem("theme", "light");
+
+            button.innerHTML = "🌙";
+        }
+    }
+
+    function togglePasswordVisibility(inputId, button){
+
+        const input = document.getElementById(inputId);
+
+        if(!input){
+            return;
+        }
+
+        if(input.type === "password"){
+            input.type = "text";
+            button.classList.add("password-visible");
+            button.setAttribute("aria-label", "Şifreyi gizle");
+        }else{
+            input.type = "password";
+            button.classList.remove("password-visible");
+            button.setAttribute("aria-label", "Şifreyi göster");
+        }
+    }
+
+
+    window.onload = function(){
+
+        const button = document.getElementById("themeButton");
+
+        if(localStorage.getItem("theme") === "dark"){
+
+            document.body.classList.add("dark-mode");
+
+            button.innerHTML = "☀️";
+
+        }else{
+
+            button.innerHTML = "🌙";
+        }
+    }
+
+</script>
+</html>

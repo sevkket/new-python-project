@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="news-detail-container fade-in">
+    
+    <div class="detail-navigation">
+        <a href="/" class="btn-back-to-main">
+            <i class="fa-solid fa-arrow-left-long"></i> Ana Sayfaya Dön
+        </a>
+    </div>
+
+    <article class="news-main-card">
+        
+        {% if article.urlToImage %}
+            <div class="news-image-wrapper">
+                <img 
+    src="{{ article.urlToImage if article.urlToImage else '/static/no-image.jpg' }}"onerror="this.src='/static/no-image.jpg'"style="width:100%; border-radius:12px;"class="news-cover-img" alt="{{ article.title }}">
+            </div>
+        {% endif %}
+
+        <h1 class="news-detail-title">{{ article.title }}</h1>
+        <div class="news-full-content">
+            <h3 class="section-sub-title">Haber İçeriği</h3>
+            <p class="news-body-text">{{ article.description }}</p>
+            
+            <a href="{{ article.url }}" target="_blank" class="read-news-full-btn" style="display:inline-block; margin-bottom: 25px; padding: 10px 20px; background-color: var(--nd-primary); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Haberi Kaynağından Oku
+            </a>
+        </div>
+        
+        <section class="news-comments-section">
+            
+            <div class="comments-section-header">
+                <h3><i class="fa-regular fa-comments"></i> Yorumlar ({{ comments|length }})</h3>
+            </div>
+            
+            <form action="/add_comment" method="POST" class="corporate-comment-form">
+                <input type="hidden" name="url" value="{{ article.url }}">
+                
+                <div class="comment-input-group">
+                    <input 
+                        type="text" 
+                        name="text" 
+                        placeholder="Bu haber hakkında ne düşünüyorsunuz? Görüşlerinizi paylaşın..." 
+                        required
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="btn-comment-submit">
+                        <span>Gönder</span> <i class="fa-regular fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+            
+            <div class="corporate-comments-list">
+                {% if comments %}
+                    {% for comment in comments %}
+                        <div class="corporate-comment-item">
+                            <div class="comment-user-avatar">
+                                {{ comment.username[0] | upper }}
+                            </div>
+                            <div class="comment-main-body">
+                                <div class="comment-meta-info">
+                                    <span class="comment-author-name">{{ comment.username }}</span>
+                                    <span class="comment-timestamp"><i class="fa-regular fa-clock"></i> {{ comment.created_at[:16] }}</span>
+                                </div>
+                                <p class="comment-text-content">{{ comment.text }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-comments-fallback">
+                        <i class="fa-solid fa-comments-bubble"></i>
+                        <p>Henüz yorum yapılmamış. İlk değerlendirmeyi siz yapın!</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </section>
+
+    </article>
+</div>
+
+<style>
+    :root {
+        --nd-bg: #f8fafc;
+        --nd-card: #ffffff;
+        --nd-text-main: #0f172a;
+        --nd-text-muted: #475569;
+        --nd-border: #cbd5e1;
+        --nd-primary: #1e3a8a; /* Kurumsal Yönetim Mavisi ile Uyumlu */
+        --nd-ai-bg: #f1f5f9;
+        --nd-ai-border: #3b82f6;
+    }
+
+    /* Koyu Mod Senkronizasyonu (base.html ile tam entegre) */
+    body.dark-mode {
+        --nd-bg: #0f172a;
+        --nd-card: #1e293b;
+        --nd-text-main: #f8fafc;
+        --nd-text-muted: #94a3b8;
+        --nd-border: #334155;
+        --nd-primary: #3b82f6;
+        --nd-ai-bg: #111827;
+        --nd-ai-border: #2563eb;
+    }
+
+    .news-detail-container {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 30px 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .detail-navigation {
+        margin-bottom: 20px;
+    }
+
+    .btn-back-to-main {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--nd-text-muted) !important;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+
+    .btn-back-to-main:hover {
+        color: var(--nd-primary) !important;
+    }
+
+    .news-main-card {
+        background: var(--nd-card);
+        border: 1px solid var(--nd-border);
+        border-radius: 12px;
+        padding: 35px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .news-image-wrapper {
+        width: 100%;
+        max-height: 420px;
+        overflow: hidden;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        border: 1px solid var(--nd-border);
+    }
+
+    .news-cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .news-detail-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--nd-text-main);
+        line-height: 1.35;
+        margin: 0 0 25px 0;
+        letter-spacing: -0.5px;
+    }
+
+    /* Kurumsal AI Özet Kutusu */
+    .corporate-ai-summary-box {
+        background-color: var(--nd-ai-bg);
+        border-left: 4px solid var(--nd-ai-border);
+        border-radius: 0 8px 8px 0;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .ai-summary-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--nd-ai-border);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .ai-summary-content p {
+        margin: 0;
+        font-size: 14.5px;
+        line-height: 1.6;
+        color: var(--nd-text-main);
+        font-style: italic;
+    }
+
+    /* Haber İçerik Alanı */
+    .section-sub-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--nd-text-muted);
+        margin: 0 0 10px 0;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .news-body-text {
+        font-size: 16px;
+        line-height: 1.7;
+        color: var(--nd-text-main);
+        margin: 0 0 35px 0;
+    }
+
+    /* Yorumlar Alanı */
+    .news-comments-section {
+        border-top: 1px solid var(--nd-border);
+        padding-top: 30px;
+    }
+
+    .comments-section-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--nd-text-main);
+        margin: 0 0 20px 0;
+    }
+
+    /* Kurumsal Yorum Giriş Alanı */
+    .corporate-comment-form .comment-input-group {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    .comment-input-group input {
+        flex: 1;
+        padding: 12px 18px;
+        border: 1px solid var(--nd-border);
+        background: var(--nd-card);
+        color: var(--nd-text-main);
+        border-radius: 6px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .comment-input-group input:focus {
+        border-color: var(--nd-primary);
+    }
+
+    .btn-comment-submit {
+        background: var(--nd-primary);
+        color: #ffffff !important;
+        border: none;
+        padding: 0 22px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.2s;
+    }
+
+    .btn-comment-submit:hover {
+        opacity: 0.9;
+    }
+
+    /* Yorum Öğeleri */
+    .corporate-comments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .corporate-comment-item {
+        display: flex;
+        gap: 15px;
+        background: var(--nd-ai-bg);
+        border: 1px solid var(--nd-border);
+        padding: 16px;
+        border-radius: 8px;
+    }
+
+    .comment-user-avatar {
+        width: 38px;
+        height: 38px;
+        background-color: var(--nd-primary);
+        color: white !important;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .comment-main-body {
+        flex: 1;
+    }
+
+    .comment-meta-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+
+    .comment-author-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--nd-text-main);
+    }
+
+    .comment-timestamp {
+        font-size: 11px;
+        color: var(--nd-text-muted);
+    }
+
+    .comment-text-content {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--nd-text-main);
+    }
+
+    .no-comments-fallback {
+        text-align: center;
+        padding: 30px;
+        color: var(--nd-text-muted);
+        font-style: italic;
+        font-size: 13.5px;
+    }
+
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+{% endblock %}

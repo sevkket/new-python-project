@@ -1,0 +1,405 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="admin-layout">
+
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-user-shield"></i>
+            <h2>Yönetici Paneli</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/admin_panel" class="{% if not request.args.get('tab') %}active{% endif %}">
+                <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </a>
+            <a href="/admin_panel?tab=users" class="{% if request.args.get('tab') == 'users' %}active{% endif %}">
+                <i class="fa-solid fa-users"></i> Kullanıcı Yönetimi
+            </a>
+            <a href="/admin_panel?tab=news" class="{% if request.args.get('tab') == 'news' %}active{% endif %}">
+                <i class="fa-solid fa-heart-pulse"></i> Favori Haberler
+            </a>
+            <div class="sidebar-divider"></div>
+            <a href="/" target="_blank" class="view-site-link">
+                <i class="fa-solid fa-globe"></i> Siteyi Görüntüle
+            </a>
+            <a href="/admin_logout" class="logout-link" onclick="return confirm('Çıkış yapmak istediğinize emin misiniz?');">
+                <i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap
+            </a>
+        </nav>
+    </aside>
+
+    <main class="admin-content">
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users-bg">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Toplam Kullanıcı</h3>
+                    <p>{{ user_count }}</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon reads-bg">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Toplam Okuma</h3>
+                    <p>{{ read_count }}</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon today-bg">
+                    <i class="fa-solid fa-calendar-day"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Bugünkü Okuma</h3>
+                    <p>{{ today_read_count }}</p>
+                </div>
+            </div>
+        </div>
+
+        {% if request.args.get("tab") == "news" %}
+            <section class="admin-section fade-in">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-heart-pulse"></i> Favori Haber Yönetimi</h2>
+                    <p class="admin-info">Kullanıcıların panolarına eklediği favori içerikleri filtreleyebilir ve yönetebilirsiniz.</p>
+                </div>
+
+                <form method="GET" action="/admin_panel" class="search-form">
+                    <input type="hidden" name="tab" value="news">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input
+                            type="text"
+                            name="news_search"
+                            placeholder="Haber başlığı veya kullanıcı adı ara..."
+                            value="{{ news_search }}"
+                        >
+                    </div>
+                    <button type="submit" class="btn-primary">Filtrele</button>
+                    {% if news_search %}
+                        <a href="/admin_panel?tab=news" class="btn-reset" title="Aramayı Temizle"><i class="fa-solid fa-rotate-left"></i></a>
+                    {% endif %}
+                </form>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Kullanıcı</th>
+                                <th>Haber Başlığı</th>
+                                <th class="text-center">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fav in favorites %}
+                            <tr>
+                                <td><span class="badge-id">#{{ fav.id }}</span></td>
+                                <td><strong><i class="fa-regular fa-user"></i> {{ fav.username }}</strong></td>
+                                <td class="truncate-text" title="{{ fav.title }}">{{ fav.title }}</td>
+                                <td class="text-center">
+                                    <a class="delete-btn" href="/admin_delete_favorite/{{ fav.id }}" onclick="return confirm('Bu haberi kullanıcının favorilerinden silmek istediğinize emin misiniz?');">
+                                        <i class="fa-regular fa-trash-can"></i> Favoriden Kaldır
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="table-empty">Aranan kriterlere uygun favori haber bulunamadı.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        {% elif request.args.get("tab") == "users" %}
+            <section class="admin-section fade-in">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-users"></i> Kullanıcı Yönetimi</h2>
+                    <p class="admin-info">Sistemdeki tüm kayıtlı üyelerin detaylarını inceleyebilir, bilgilerini düzenleyebilir veya hesaplarını kapatabilirsiniz.</p>
+                </div>
+
+                <form method="GET" action="/admin_panel" class="search-form">
+                    <input type="hidden" name="tab" value="users">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-user-gear"></i>
+                        <input
+                            type="text"
+                            name="user_search"
+                            placeholder="Kullanıcı adı ara..."
+                            value="{{ user_search }}"
+                        >
+                    </div>
+                    <button type="submit" class="btn-primary">Ara</button>
+                    {% if user_search %}
+                        <a href="/admin_panel?tab=users" class="btn-reset" title="Aramayı Temizle"><i class="fa-solid fa-rotate-left"></i></a>
+                    {% endif %}
+                </form>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Kullanıcı Adı</th>
+                                <th class="text-right">Aksiyonlar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td><span class="badge-id">#{{ user.id }}</span></td>
+                                <td>
+                                    <span class="user-avatar-placeholder">{{ user.username[0] | upper }}</span>
+                                    <strong>{{ user.username }}</strong>
+                                </td>
+                                <td class="action-buttons text-right">
+                                    <a class="info-btn" href="/admin_user_detail/{{ user.id }}" title="Kullanıcı İstatistikleri ve Geçmişi">
+                                        <i class="fa-solid fa-chart-line"></i> Detay
+                                    </a>
+                                    <a class="edit-btn" href="/admin_edit_user/{{ user.id }}" title="Kullanıcı Adını Düzenle">
+                                        <i class="fa-regular fa-pen-to-square"></i> Düzenle
+                                    </a>
+                                    <a class="delete-btn" href="/admin_delete_user/{{ user.id }}" onclick="return confirm('DİKKAT! Bu kullanıcıyı sildiğinizde ona ait tüm okuma geçmişi ve favoriler de silinecektir. Onaylıyor musunuz?');">
+                                        <i class="fa-regular fa-trash-can"></i> Sil
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="table-empty">Aranan kullanıcı adı sistemde bulunamadı.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        {% else %}
+            <section class="admin-section fade-in">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-chart-pie"></i> Sistem Özeti (Dashboard)</h2>
+                    <p class="admin-info">Sitedeki anlık etkileşimleri, popüler içerikleri ve aktif kitleyi buradan takip edebilirsiniz.</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-title-bar">
+                            <h3><i class="fa-solid fa-user-plus"></i> Son Kayıt Olanlar</h3>
+                        </div>
+                        <div class="card-content">
+                            {% for user in recent_users %}
+                                <div class="dashboard-row">
+                                    <span class="row-text"><i class="fa-regular fa-circle-user"></i> {{ user.username }}</span>
+                                    <a href="/admin_user_detail/{{ user.id }}" class="row-link">İncele <i class="fa-solid fa-angle-right"></i></a>
+                                </div>
+                            {% else %}
+                                <p class="dashboard-empty"><i class="fa-solid fa-ban"></i> Henüz kayıtlı kullanıcı yok.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-title-bar">
+                            <h3><i class="fa-solid fa-star"></i> Son Favoriye Eklenenler</h3>
+                        </div>
+                        <div class="card-content">
+                            {% for fav in recent_favorites %}
+                                <div class="dashboard-row">
+                                    <span class="row-text truncate-text" title="{{ fav.title }}"><i class="fa-regular fa-newspaper"></i> {{ fav.title }}</span>
+                                    <a href="/admin_delete_favorite/{{ fav.id }}" class="row-link-danger" onclick="return confirm('Silmek istediğinize emin misiniz?');">Kaldır</a>
+                                </div>
+                            {% else %}
+                                <p class="dashboard-empty"><i class="fa-solid fa-ban"></i> Henüz favori işlemi yok.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-title-bar">
+                            <h3><i class="fa-solid fa-fire"></i> En Çok Okunan Haberler</h3>
+                        </div>
+                        <div class="card-content">
+                            {% for read in top_reads %}
+                                <div class="dashboard-row">
+                                    <span class="row-text truncate-text" title="{{ read.title }}"><i class="fa-solid fa-arrow-trend-up"></i> {{ read.title }}</span>
+                                    <span class="row-badge">{{ read.read_total }} Hit</span>
+                                </div>
+                            {% else %}
+                                <p class="dashboard-empty"><i class="fa-solid fa-ban"></i> Okuma trafiği bulunmuyor.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <div class="card-title-bar">
+                            <h3><i class="fa-solid fa-crown"></i> En Aktif Okuyucular</h3>
+                        </div>
+                        <div class="card-content">
+                            {% for reader in active_readers %}
+                                <div class="dashboard-row">
+                                    <span class="row-text">👑 {{ reader.username }}</span>
+                                    <a href="/admin_user_detail/{{ reader.id }}" class="row-badge link-badge">{{ reader.read_total }} Makale</a>
+                                </div>
+                            {% else %}
+                                <p class="dashboard-empty"><i class="fa-solid fa-ban"></i> Aktif okuyucu verisi yok.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+    </main>
+
+</div>
+
+<style>
+    :root {
+        --admin-primary: #4f46e5;
+        --admin-primary-hover: #4338ca;
+        --admin-dark: #1e1b4b;
+        --admin-sidebar-bg: #111827;
+        --admin-bg: #f3f4f6;
+        --admin-card-bg: #ffffff;
+        --text-main: #374151;
+        --text-muted: #6b7280;
+        --border-color: #e5e7eb;
+        --danger-color: #ef4444;
+        --danger-hover: #dc2626;
+        --success-color: #10b981;
+        --info-color: #3b82f6;
+    }
+
+    .admin-layout {
+        display: flex;
+        min-height: 100vh;
+        background-color: var(--admin-bg);
+        color: var(--text-main);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: -20px;
+    }
+
+    /* Sol Menü Tasarımı */
+    .admin-sidebar {
+        width: 260px;
+        background-color: var(--admin-sidebar-bg);
+        color: #ffffff !important;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+        box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 20px 20px 20px;
+        border-bottom: 1px solid #1f2937;
+    }
+
+    .sidebar-header i { font-size: 24px; color: #818cf8; }
+    .sidebar-header h2 { font-size: 18px; margin: 0; font-weight: 600; color: #ffffff !important; }
+
+    .sidebar-nav { display: flex; flex-direction: column; padding: 25px 10px; gap: 8px; flex: 1; }
+    .sidebar-nav a { display: flex; align-items: center; gap: 12px; color: #9ca3af !important; text-decoration: none; padding: 12px 15px; border-radius: 8px; font-weight: 500; transition: all 0.2s ease; }
+    .sidebar-nav a:hover { background-color: #1f2937 !important; color: #ffffff !important; }
+    .sidebar-nav a.active { background-color: var(--admin-primary) !important; color: #ffffff !important; }
+
+    .sidebar-divider { height: 1px; background-color: #1f2937; margin: 15px 5px; }
+    .view-site-link { margin-top: auto; color: #60a5fa !important; }
+    .logout-link { color: #f87171 !important; }
+    .logout-link:hover { background-color: rgba(239, 68, 68, 0.1) !important; color: #f87171 !important; }
+
+    /* Sağ İçerik Alanı */
+    .admin-content { flex: 1; padding: 30px; overflow-y: auto; background-color: var(--admin-bg); }
+
+    /* İstatistik Kartları */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .stat-card { background: var(--admin-card-bg); border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .stat-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; }
+    
+    .users-bg { background-color: var(--admin-primary); }
+    .reads-bg { background-color: var(--info-color); }
+    .today-bg { background-color: var(--success-color); }
+
+    .stat-info h3 { font-size: 14px; color: var(--text-muted); margin: 0 0 5px 0; font-weight: 500; }
+    .stat-info p { font-size: 24px; font-weight: 700; margin: 0; color: var(--admin-dark); }
+
+    /* Sekme ve Form Düzeni */
+    .admin-section { background: var(--admin-card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); color: var(--text-main); }
+    .section-header { border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
+    .section-header h2 { font-size: 20px; margin: 0 0 5px 0; color: var(--admin-dark); }
+    .admin-info { font-size: 14px; color: var(--text-muted); margin: 0; }
+
+    /* Arama Barı */
+    .search-form { display: flex; gap: 10px; margin-bottom: 20px; max-width: 500px; }
+    .search-input-wrapper { position: relative; flex: 1; }
+    .search-input-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .search-input-wrapper input { width: 100%; padding: 10px 10px 10px 35px; border: 1px solid var(--border-color); border-radius: 8px; outline: none; font-size: 14px; color: #000000 !important; background-color: #ffffff !important; box-sizing: border-box; }
+
+    .btn-primary { background-color: var(--admin-primary); color: white !important; border: none; padding: 0 20px; border-radius: 8px; cursor: pointer; font-weight: 500; }
+    .btn-primary:hover { background-color: var(--admin-primary-hover) !important; color: white !important; }
+
+    .btn-reset { display: flex; align-items: center; justify-content: center; background-color: #e5e7eb; color: var(--text-main) !important; padding: 0 15px; border-radius: 8px; text-decoration: none; }
+    .btn-reset:hover { background-color: #d1d5db !important; color: var(--text-main) !important; }
+
+    /* Tablo */
+    .table-container { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 10px; }
+    .admin-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    .admin-table th { background-color: #f9fafb; color: var(--text-muted); padding: 14px 18px; font-weight: 600; border-bottom: 1px solid var(--border-color); }
+    .admin-table td { padding: 14px 18px; border-bottom: 1px solid var(--border-color); vertical-align: middle; color: var(--text-main); }
+    .admin-table tr:hover td { background-color: #f9fafb; }
+
+    .badge-id { background-color: #f3f4f6; color: var(--text-main); padding: 4px 8px; border-radius: 6px; font-family: monospace; font-weight: 600; }
+    .truncate-text { max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Kullanıcı Avatar */
+    .user-avatar-placeholder { display: inline-flex; width: 28px; height: 28px; background-color: #e0e7ff; color: var(--admin-primary); border-radius: 50%; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; margin-right: 8px; }
+
+    /* Tablo Butonları Düzeltmesi */
+    .info-btn { background-color: #eff6ff; color: var(--info-color) !important; }
+    .info-btn:hover { background-color: #dbeafe !important; color: var(--info-color) !important; }
+
+    .edit-btn { background-color: #f5f3ff; color: var(--admin-primary) !important; }
+    .edit-btn:hover { background-color: #ede9fe !important; color: var(--admin-primary) !important; }
+
+    .delete-btn { background-color: #fef2f2; color: var(--danger-color) !important; }
+    .delete-btn:hover { background-color: #fee2e2 !important; color: var(--danger-color) !important; }
+
+    /* Dashboard Kartları */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(45%, 1fr)); gap: 25px; }
+    .dashboard-card { border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; background-color: var(--admin-card-bg); }
+    .card-title-bar { background-color: #f9fafb; padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
+    .card-title-bar h3 { margin: 0; font-size: 15px; color: var(--admin-dark); }
+    .card-content { padding: 10px 20px; }
+    .dashboard-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6; }
+    
+    .row-link { color: var(--admin-primary) !important; text-decoration: none; font-weight: 500; }
+    .row-link:hover { text-decoration: underline; color: var(--admin-primary-hover) !important; }
+    .row-link-danger { color: var(--danger-color) !important; text-decoration: none; }
+    .row-link-danger:hover { text-decoration: underline; color: var(--danger-hover) !important; }
+
+    .row-badge { background-color: #f3f4f6; color: var(--text-muted); padding: 3px 8px; border-radius: 12px; font-size: 12px; }
+    .link-badge { background-color: #e8f5e9; color: var(--success-color) !important; text-decoration: none; }
+    .link-badge:hover { background-color: #c8e6c9 !important; color: var(--success-color) !important; }
+
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .table-empty, .dashboard-empty { text-align: center; padding: 30px !important; color: var(--text-muted); font-style: italic; }
+
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+{% endblock %}

@@ -1,0 +1,236 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="modern-auth-container fade-in">
+    <div class="modern-auth-card">
+        
+        <div class="modern-auth-header">
+            <h2>Tekrar Hoş Geldiniz</h2>
+            <p>Hesabınıza giriş yaparak gündemi takip etmeye devam edin.</p>
+        </div>
+
+        <form method="POST" class="modern-form">
+            
+            <div class="modern-field-group">
+                <input 
+                    type="text" 
+                    id="username"
+                    name="username" 
+                    placeholder="Kullanıcı Adı" 
+                    required
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="modern-field-group password-wrapper">
+                <input 
+                    id="loginPassword" 
+                    type="password" 
+                    name="password" 
+                    placeholder="Şifre" 
+                    required
+                >
+                <button 
+                    type="button" 
+                    class="modern-toggle-btn" 
+                    onclick="togglePasswordVisibility('loginPassword', this)" 
+                    aria-label="Şifreyi göster"
+                >
+                    <i class="fa-regular fa-eye eye-main-icon"></i>
+                </button>
+            </div>
+
+            <button type="submit" class="btn-modern-primary">
+                Giriş Yap
+            </button>
+
+            <div class="modern-auth-footer">
+                <span>Hesabınız yok mu? <a href="/register">Kayıt Olun</a></span>
+                <div class="footer-separator"></div>
+                <a href="/admin_login" class="admin-badge-link">
+                    <i class="fa-solid fa-lock-open"></i> Yönetici Paneli
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<style>
+    :root {
+        --m-bg: #fafafa;
+        --m-card: #ffffff;
+        --m-text: #0b0f19;
+        --m-muted: #64748b;
+        --m-border: #e2e8f0;
+        --m-accent: #0f172a;
+        --m-accent-hover: #1e293b;
+    }
+
+    body.dark-mode {
+        --m-bg: #090d16;
+        --m-card: #111827;
+        --m-text: #f8fafc;
+        --m-muted: #94a3b8;
+        --m-border: #1f2937;
+        --m-accent: #38bdf8;
+        --m-accent-hover: #7dd3fc;
+    }
+
+    .modern-auth-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 70vh;
+        padding: 40px 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    .modern-auth-card {
+        background: var(--m-card);
+        border: 1px solid var(--m-border);
+        width: 100%;
+        max-width: 380px;
+        padding: 45px 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+    }
+
+    .modern-auth-header {
+        margin-bottom: 35px;
+    }
+
+    .modern-auth-header h2 {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--m-text);
+        letter-spacing: -0.5px;
+        margin: 0 0 10px 0;
+    }
+
+    .modern-auth-header p {
+        font-size: 13.5px;
+        color: var(--m-muted);
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .modern-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .modern-field-group {
+        position: relative;
+    }
+
+    .modern-field-group input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid var(--m-border);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--m-text);
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .modern-field-group input:focus {
+        border-color: var(--m-text);
+    }
+
+    .password-wrapper input {
+        padding-right: 46px;
+    }
+
+    .modern-toggle-btn {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: var(--m-muted);
+        cursor: pointer;
+        padding: 4px;
+        font-size: 15px;
+    }
+
+    .modern-toggle-btn.password-visible .eye-main-icon::before {
+        content: "\f070"; /* Slash eye */
+    }
+
+    .btn-modern-primary {
+        background: var(--m-text);
+        color: var(--m-card) !important;
+        border: none;
+        padding: 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        margin-top: 10px;
+    }
+    body.dark-mode .btn-modern-primary {
+        background: var(--m-accent);
+        color: #090d16 !important;
+    }
+
+    .btn-modern-primary:hover {
+        opacity: 0.9;
+    }
+
+    .modern-auth-footer {
+        text-align: center;
+        font-size: 13px;
+        color: var(--m-muted);
+        margin-top: 20px;
+    }
+
+    .modern-auth-footer a {
+        color: var(--m-text) !important;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    body.dark-mode .modern-auth-footer a {
+        color: var(--m-accent) !important;
+    }
+
+    .modern-auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .footer-separator {
+        height: 1px;
+        background: var(--m-border);
+        margin: 20px auto;
+        width: 40%;
+    }
+
+    .admin-badge-link {
+        font-size: 12px;
+        color: var(--m-muted) !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500 !important;
+        transition: color 0.2s;
+    }
+
+    .admin-badge-link:hover {
+        color: var(--m-text) !important;
+        text-decoration: none !important;
+    }
+
+    .fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+{% endblock %}

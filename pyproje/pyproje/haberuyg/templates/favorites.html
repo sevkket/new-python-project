@@ -1,0 +1,232 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+
+<div style="max-width:1400px; margin:auto; padding:30px;">
+
+    <h2 style="color:white; margin-bottom:20px;">
+        Favori Haberler
+    </h2>
+
+    <form method="GET" action="/favorites"
+          style="display:flex; gap:10px; margin-bottom:30px;">
+
+        <input
+            type="text"
+            name="search"
+            placeholder="Favorilerde haber ara..."
+            value="{{ search }}"
+            style="
+                flex:1;
+                padding:12px;
+                border-radius:10px;
+                border:none;
+                background:#1e293b;
+                color:white;
+                outline:none;
+            "
+        >
+
+        <button
+            type="submit"
+            style="
+                padding:12px 20px;
+                border:none;
+                border-radius:10px;
+                background:#3b82f6;
+                color:white;
+                cursor:pointer;
+                font-weight:bold;
+            "
+        >
+            Ara
+        </button>
+
+    </form>
+
+    <div style="
+        display:grid;
+        grid-template-columns:repeat(auto-fit, minmax(320px,1fr));
+        gap:25px;
+    ">
+
+        {% for item in favorites %}
+
+        <div style="
+            background:#111827;
+            border-radius:18px;
+            overflow:hidden;
+            box-shadow:0 4px 15px rgba(0,0,0,0.3);
+            display:flex;
+            flex-direction:column;
+        ">
+
+            {% if item.image_url %}
+            <img
+                src="{{ item.image_url }}"
+                style="
+                    width:100%;
+                    height:220px;
+                    object-fit:cover;
+                "
+            >
+            {% endif %}
+
+            <div style="padding:18px; display:flex; flex-direction:column; flex:1;">
+
+                <h3 style="
+                    color:white;
+                    font-size:20px;
+                    margin-bottom:12px;
+                    line-height:1.4;
+                ">
+                    {{ item.title }}
+                </h3>
+
+                <p style="
+                    color:#cbd5e1;
+                    line-height:1.6;
+                    font-size:14px;
+                    flex:1;
+                ">
+                    {{ item.description }}
+                </p>
+
+                <div style="
+                    display:flex;
+                    gap:10px;
+                    margin-top:20px;
+                    flex-wrap:wrap;
+                ">
+
+                    <button
+                        type="button"
+                        onclick="openFavoriteModal(
+                            `{{ item.title|e }}`,
+                            `{{ item.description|e }}`,
+                            `{{ item.image_url|e }}`,
+                            `{{ item.url|e }}`
+                        )"
+                        style="
+                            background:#2563eb;
+                            color:white;
+                            border:none;
+                            padding:10px 16px;
+                            border-radius:8px;
+                            cursor:pointer;
+                            font-weight:bold;
+                        "
+                    >
+                        Detay
+                    </button>
+
+                    <a
+                        href="{{ url_for('read_news', title=item.title, url=item.url, source='Favoriler') }}"
+                        target="_blank"
+                        style="
+                            background:#16a34a;
+                            color:white;
+                            padding:10px 16px;
+                            border-radius:8px;
+                            text-decoration:none;
+                            font-weight:bold;
+                        "
+                    >
+                        Haberi Oku
+                    </a>
+
+                    <a
+                        href="/delete_favorite/{{ item.id }}"
+                        style="
+                            background:#dc2626;
+                            color:white;
+                            padding:10px 16px;
+                            border-radius:8px;
+                            text-decoration:none;
+                            font-weight:bold;
+                        "
+                    >
+                        Sil
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+<div id="favoriteModal" class="modal">
+
+    <div class="modal-content">
+
+        <span class="close-btn" onclick="closeFavoriteModal()">
+            &times;
+        </span>
+
+        <img id="favoriteModalImage" class="modal-image">
+
+        <div class="modal-body">
+
+            <h2 id="favoriteModalTitle"></h2>
+
+            <p id="favoriteModalDescription"></p>
+
+            <a id="favoriteModalUrl"
+               href="#"
+               target="_blank"
+               class="modal-link">
+                Haberi Oku
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function openFavoriteModal(title, description, image, url){
+
+    document.getElementById("favoriteModalTitle").innerText = title;
+
+    document.getElementById("favoriteModalDescription").innerText =
+        description || "Bu haber için açıklama bulunmamaktadır.";
+
+    document.getElementById("favoriteModalUrl").href =
+        "/read?title=" + encodeURIComponent(title)
+        + "&url=" + encodeURIComponent(url)
+        + "&source=Favoriler";
+
+    const modalImage = document.getElementById("favoriteModalImage");
+
+    if(image && image !== "None"){
+        modalImage.src = image;
+        modalImage.style.display = "block";
+    }else{
+        modalImage.style.display = "none";
+    }
+
+    document.getElementById("favoriteModal").style.display = "flex";
+}
+
+function closeFavoriteModal(){
+    document.getElementById("favoriteModal").style.display = "none";
+}
+
+window.addEventListener("click", function(event){
+
+    const modal = document.getElementById("favoriteModal");
+
+    if(event.target === modal){
+        closeFavoriteModal();
+    }
+});
+</script>
+
+{% endblock %}

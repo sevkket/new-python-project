@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="profile-container fade-in">
+    
+    <div class="profile-header-card">
+        <div class="profile-user-info">
+            <div class="profile-avatar-big">
+                {{ user.username[0] | upper }}
+            </div>
+            <div class="profile-user-meta">
+                <h2>{{ user.username }}</h2>
+                <div class="profile-stats-badges">
+                    <span class="badge badge-fav"><i class="fa-solid fa-star"></i> {{ favorite_count }} Favori</span>
+                    <span class="badge badge-read"><i class="fa-solid fa-book-open"></i> {{ read_count }} Okuma</span>
+                </div>
+            </div>
+        </div>
+        <div class="action-buttons">
+            <a class="settings-btn" href="/settings">
+                <i class="fa-solid fa-gear"></i> Hesap Ayarları
+            </a>
+        </div>
+    </div>
+
+    <div class="section-title-wrapper">
+        <h2><i class="fa-solid fa-heart" style="color: #ef4444;"></i> Favori Haberlerim</h2>
+        <div class="title-line"></div>
+    </div>
+
+    <div class="profile-favorite-list">
+        {% for item in favorites %}
+            <div class="profile-favorite-item">
+                
+                <div class="favorite-image-wrapper">
+                    {% if item.image_url %}
+                        <img src="{{ item.image_url }}" alt="Haber Görseli" onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<div class=\'profile-favorite-image-placeholder\'><i class=\'fa-regular fa-image\'></i></div>';">
+                    {% else %}
+                        <div class="profile-favorite-image-placeholder">
+                            <i class="fa-regular fa-image"></i>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="profile-favorite-content">
+                    <h3>{{ item.title }}</h3>
+                    <p>
+                        {% if item.description %}
+                            {{ item.description }}
+                        {% else %}
+                            Bu haber için kısa açıklama bulunmamaktadır.
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="profile-favorite-actions">
+                    <a class="read-news-btn" href="{{ url_for('read_news', title=item.title, url=item.url, source='Profil') }}" target="_blank">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Haberi Oku
+                    </a>
+                    <a class="delete-fav-btn" href="/delete_favorite/{{ item.id }}" onclick="return confirm('Bu haberi favorilerinizden silmek istediğinize emin misiniz?');">
+                        <i class="fa-regular fa-trash-can"></i> Sil
+                    </a>
+                </div>
+
+            </div>
+        {% else %}
+            <div class="empty-profile-box">
+                <i class="fa-regular fa-star-half-stroke"></i>
+                <p>Henüz favorilerinize bir haber eklemediniz.</p>
+                <a href="/" class="empty-box-action-btn">Haberleri Keşfet</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="profile-section-gap"></div>
+
+    <div class="section-title-wrapper">
+        <h2><i class="fa-solid fa-clock-rotate-left" style="color: #3b82f6;"></i> Yakında Okuduklarım</h2>
+        <div class="title-line"></div>
+    </div>
+
+    <form method="GET" action="/profile" class="profile-search-form">
+        <div class="search-input-container">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+                type="text"
+                name="read_search"
+                placeholder="Geçmiş okumalarınızda arayın..."
+                value="{{ read_search or '' }}"
+                autocomplete="off"
+            >
+        </div>
+        <button type="submit" class="btn-search-submit">Ara</button>
+        {% if read_search %}
+            <a href="/profile" class="btn-search-clear" title="Aramayı Temizle"><i class="fa-solid fa-xmark"></i></a>
+        {% endif %}
+    </form>
+
+    <div class="read-list">
+        {% for read in reads %}
+            <div class="read-item">
+                <div class="read-item-left">
+                    <div class="read-history-icon">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div class="read-info-texts">
+                        <h3>{{ read.title }}</h3>
+                        <p>
+                            <span class="read-source-tag"><i class="fa-solid fa-newspaper"></i> {{ read.source }}</span>
+                            <span class="read-time-tag"><i class="fa-regular fa-clock"></i> {{ read.read_at }}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="read-actions">
+                    <a class="btn-re-read" href="{{ url_for('read_news', title=read.title, url=read.url, source=read.source) }}" target="_blank">
+                        <i class="fa-solid fa-rotate-left"></i> Tekrar Oku
+                    </a>
+                    <a class="btn-delete-history" href="/delete_read/{{ read.id }}" onclick="return confirm('Bu okuma kaydını geçmişinizden silmek istiyor musunuz?');">
+                        <i class="fa-regular fa-trash-can"></i> Sil
+                    </a>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-profile-box">
+                <i class="fa-solid fa-box-open"></i>
+                <p>{% if read_search %}Aramanızla eşleşen bir okuma kaydı bulunamadı.{% else %}Henüz okuma geçmişiniz bulunmamaktadır.{% endif %}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<style>
+    :root {
+        --p-bg: #f3f4f6;
+        --p-card-bg: #ffffff;
+        --p-text-main: #1f2937;
+        --p-text-muted: #6b7280;
+        --p-primary: #4f46e5;
+        --p-primary-hover: #4338ca;
+        --p-border: #e5e7eb;
+        --p-danger: #ef4444;
+        --p-danger-light: #fef2f2;
+        --p-danger-hover: #dc2626;
+    }
+
+    /* Koyu Mod Ezici Ayarları */
+    body.dark-mode {
+        --p-bg: #111827;
+        --p-card-bg: #1f2937;
+        --p-text-main: #f9fafb;
+        --p-text-muted: #9ca3af;
+        --p-border: #374151;
+        --p-danger-light: rgba(239, 68, 68, 0.1);
+    }
+
+    .profile-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        padding: 0 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Üst Kart */
+    .profile-header-card {
+        background-color: var(--p-card-bg);
+        border: 1px solid var(--p-border);
+        border-radius: 16px;
+        padding: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        margin-bottom: 40px;
+    }
+
+    .profile-user-info { display: flex; align-items: center; gap: 20px; }
+    
+    .profile-avatar-big {
+        width: 70px;
+        height: 70px;
+        background-color: var(--p-primary);
+        color: #ffffff !important;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .profile-user-meta h2 { margin: 0 0 8px 0; font-size: 24px; color: var(--p-text-main); font-weight: 700; }
+    .profile-stats-badges { display: flex; gap: 10px; }
+    
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .badge-fav { background-color: #fef3c7; color: #d97706 !important; }
+    .badge-read { background-color: #dbeafe; color: #2563eb !important; }
+    
+    body.dark-mode .badge-fav { background-color: rgba(217, 119, 6, 0.2); color: #fbbf24 !important; }
+    body.dark-mode .badge-read { background-color: rgba(37, 99, 235, 0.2); color: #60a5fa !important; }
+
+    .settings-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: transparent;
+        color: var(--p-text-main) !important;
+        border: 1px solid var(--p-border);
+        padding: 10px 18px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .settings-btn:hover { background-color: var(--p-border) !important; color: var(--p-text-main) !important; }
+
+    /* Başlık Çizgileri */
+    .section-title-wrapper { margin-bottom: 25px; }
+    .section-title-wrapper h2 { font-size: 20px; margin: 0 0 8px 0; color: var(--p-text-main); font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    .title-line { height: 3px; width: 60px; background-color: var(--p-primary); border-radius: 2px; }
+
+    /* FAVORİ LİSTESİ (KARTLAR) */
+    .profile-favorite-list { display: flex; flex-direction: column; gap: 20px; }
+    
+    .profile-favorite-item {
+        background-color: var(--p-card-bg);
+        border: 1px solid var(--p-border);
+        border-radius: 14px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        gap: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .profile-favorite-item:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.05); }
+
+    .favorite-image-wrapper { width: 140px; height: 95px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background-color: var(--p-bg); }
+    .favorite-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .profile-favorite-image-placeholder {
+        width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        background-color: var(--p-bg); color: var(--p-text-muted); font-size: 24px;
+    }
+
+    .profile-favorite-content { flex: 1; }
+    .profile-favorite-content h3 { margin: 0 0 6px 0; font-size: 16px; color: var(--p-text-main); font-weight: 600; line-height: 1.4; }
+    
+    /* Uyarının düzeltildiği alan */
+    .profile-favorite-content p { 
+        margin: 0; 
+        font-size: 13px; 
+        color: var(--p-text-muted); 
+        line-height: 1.5; 
+        display: -webkit-box; 
+        -webkit-line-clamp: 2; 
+        -webkit-box-orient: vertical; 
+        line-clamp: 2; 
+        overflow: hidden; 
+    }
+
+    .profile-favorite-actions { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; min-width: 110px; }
+    
+    .read-news-btn {
+        background-color: var(--p-primary); color: #ffffff !important;
+        text-align: center; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; transition: background-color 0.2s;
+    }
+    .read-news-btn:hover { background-color: var(--p-primary-hover) !important; color: #ffffff !important; }
+
+    .delete-fav-btn {
+        background-color: var(--p-danger-light); color: var(--p-danger) !important;
+        text-align: center; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.2s;
+    }
+    .delete-fav-btn:hover { background-color: var(--p-danger) !important; color: #ffffff !important; }
+
+    /* ARAMA FORMU */
+    .profile-search-form { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+    .search-input-container { position: relative; flex: 1; }
+    .search-input-container i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--p-text-muted); }
+    .search-input-container input {
+        width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--p-border); border-radius: 10px;
+        background-color: var(--p-card-bg); color: var(--p-text-main); outline: none; font-size: 14px; box-sizing: border-box;
+    }
+    .search-input-container input:focus { border-color: var(--p-primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    
+    .btn-search-submit {
+        background-color: var(--p-primary); color: white !important; border: none; padding: 12px 24px; border-radius: 10px;
+        cursor: pointer; font-weight: 600; font-size: 14px; transition: background-color 0.2s;
+    }
+    .btn-search-submit:hover { background-color: var(--p-primary-hover) !important; color: white !important; }
+    
+    .btn-search-clear {
+        background-color: var(--p-border); color: var(--p-text-main) !important; display: flex; align-items: center; justify-content: center;
+        width: 43px; height: 43px; border-radius: 10px; text-decoration: none; font-size: 16px; transition: background-color 0.2s;
+    }
+    .btn-search-clear:hover { background-color: var(--p-text-muted) !important; color: var(--p-card-bg) !important; }
+
+    /* OKUMA GEÇMİŞİ LİSTESİ */
+    .read-list { display: flex; flex-direction: column; gap: 12px; }
+    
+    .read-item {
+        background-color: var(--p-card-bg); border: 1px solid var(--p-border); border-radius: 12px;
+        padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px;
+    }
+    .read-item-left { display: flex; align-items: center; gap: 15px; flex: 1; }
+    
+    .read-history-icon {
+        width: 32px; height: 32px; background-color: #e8f5e9; color: #10b981; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+    }
+    body.dark-mode .read-history-icon { background-color: rgba(16, 185, 129, 0.15); }
+
+    .read-info-texts h3 { margin: 0 0 5px 0; font-size: 15px; color: var(--p-text-main); font-weight: 600; line-height: 1.4; }
+    .read-info-texts p { margin: 0; font-size: 12px; color: var(--p-text-muted); display: flex; gap: 15px; flex-wrap: wrap; }
+    .read-source-tag, .read-time-tag { display: inline-flex; align-items: center; gap: 4px; }
+
+    .read-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    
+    .btn-re-read {
+        background-color: #f3f4f6; color: #374151 !important; text-decoration: none;
+        padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; transition: background-color 0.2s;
+    }
+    body.dark-mode .btn-re-read { background-color: #374151; color: #f9fafb !important; }
+    .btn-re-read:hover { background-color: #e5e7eb !important; color: #111827 !important; }
+    body.dark-mode .btn-re-read:hover { background-color: #4b5563 !important; color: #ffffff !important; }
+
+    .btn-delete-history {
+        background-color: transparent; color: var(--p-text-muted) !important; text-decoration: none;
+        padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;
+    }
+    .btn-delete-history:hover { background-color: var(--p-danger-light) !important; color: var(--p-danger) !important; }
+
+    /* BOŞ KUTULAR */
+    .empty-profile-box {
+        background-color: var(--p-card-bg); border: 2px dashed var(--p-border); border-radius: 14px;
+        padding: 40px; text-align: center; color: var(--p-text-muted);
+    }
+    .empty-profile-box i { font-size: 36px; margin-bottom: 12px; display: block; color: var(--p-text-muted); opacity: 0.6; }
+    .empty-profile-box p { margin: 0 0 15px 0; font-size: 14px; font-style: italic; }
+    
+    .empty-box-action-btn {
+        display: inline-block; background-color: var(--p-primary); color: white !important;
+        text-decoration: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background-color 0.2s;
+    }
+    .empty-box-action-btn:hover { background-color: var(--p-primary-hover) !important; color: white !important; }
+
+    .profile-section-gap { height: 40px; }
+    .fade-in { animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Mobil Ekran Optimizasyonu */
+    @media (max-width: 600px) {
+        .profile-favorite-item { flex-direction: column; align-items: stretch; }
+        .favorite-image-wrapper { width: 100%; height: 160px; }
+        .profile-favorite-actions { flex-direction: row; }
+        .profile-favorite-actions a { flex: 1; }
+        .read-item { flex-direction: column; align-items: stretch; gap: 15px; }
+        .read-actions { justify-content: flex-end; }
+        .profile-search-form { flex-direction: column; align-items: stretch; }
+        .btn-search-clear { height: 43px; width: auto; }
+    }
+</style>
+
+{% endblock %}

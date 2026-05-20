@@ -1,0 +1,371 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="auth-wrapper fade-in">
+    <div class="auth-card">
+        
+        <div class="auth-header">
+            <div class="auth-icon-circle">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+            <h2>Hesap Ayarları</h2>
+            <p>Profil bilgilerinizi ve giriş şifrenizi bu ekrandan güncelleyebilirsiniz.</p>
+        </div>
+
+        <div class="settings-profile-summary">
+            <div class="settings-avatar-mini">
+                {{ user.username[0] | upper }}
+            </div>
+            <div class="settings-summary-meta">
+                <h3>{{ user.username }}</h3>
+                <span class="badge badge-fav"><i class="fa-solid fa-star"></i> {{ favorite_count }} Favori Haber</span>
+            </div>
+        </div>
+
+        <form method="POST" class="auth-form">
+            
+            <div class="auth-input-group">
+                <label for="username">Kullanıcı Adı</label>
+                <div class="auth-input-wrapper">
+                    <i class="fa-solid fa-user"></i>
+                    <input 
+                        type="text" 
+                        id="username"
+                        name="username" 
+                        value="{{ user.username }}"
+                        placeholder="Yeni kullanıcı adı" 
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <div class="auth-input-group">
+                <label for="currentPassword">Mevcut Şifre</label>
+                <div class="auth-input-wrapper">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <input 
+                        id="currentPassword" 
+                        type="password" 
+                        name="current_password" 
+                        placeholder="Değişiklik için mevcut şifreniz" 
+                        required
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle-btn" 
+                        onclick="togglePasswordVisibility('currentPassword', this)" 
+                        aria-label="Şifreyi göster"
+                    >
+                        <i class="fa-solid fa-eye eye-main-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-input-group">
+                <label for="newPassword">Yeni Şifre</label>
+                <div class="auth-input-wrapper">
+                    <i class="fa-solid fa-lock"></i>
+                    <input 
+                        id="newPassword" 
+                        type="password" 
+                        name="password" 
+                        placeholder="Yeni güçlü bir şifre" 
+                        required
+                    >
+                    <button 
+                        type="button" 
+                        class="password-toggle-btn" 
+                        onclick="togglePasswordVisibility('newPassword', this)" 
+                        aria-label="Şifreyi göster"
+                    >
+                        <i class="fa-solid fa-eye eye-main-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-auth-submit">
+                <span>Bilgileri Güncelle</span>
+                <i class="fa-solid fa-floppy-disk"></i>
+            </button>
+
+            <div class="auth-footer">
+                <a href="/profile" class="back-profile-link">
+                    <i class="fa-solid fa-arrow-left"></i> Profile Geri Dön
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<style>
+    :root {
+        --auth-bg: #f3f4f6;
+        --auth-card-bg: #ffffff;
+        --auth-text-main: #1f2937;
+        --auth-text-muted: #6b7280;
+        --auth-primary: #4f46e5;
+        --auth-primary-hover: #4338ca;
+        --auth-border: #e5e7eb;
+        --auth-input-bg: #f9fafb;
+    }
+
+    /* Koyu Mod Ayarları (base.html ile senkronize) */
+    body.dark-mode {
+        --auth-bg: #111827;
+        --auth-card-bg: #1f2937;
+        --auth-text-main: #f9fafb;
+        --auth-text-muted: #9ca3af;
+        --auth-border: #374151;
+        --auth-input-bg: #111827;
+    }
+
+    .auth-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .auth-card {
+        background-color: var(--auth-card-bg);
+        border: 1px solid var(--auth-border);
+        width: 100%;
+        max-width: 440px;
+        padding: 40px 35px;
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .auth-icon-circle {
+        width: 65px;
+        height: 65px;
+        background-color: rgba(79, 70, 229, 0.1);
+        color: var(--auth-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin: 0 auto 15px auto;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.1);
+    }
+    body.dark-mode .auth-icon-circle {
+        background-color: rgba(129, 140, 248, 0.15);
+        color: #818cf8;
+    }
+
+    .auth-header h2 {
+        font-size: 24px;
+        color: var(--auth-text-main);
+        margin: 0 0 8px 0;
+        font-weight: 700;
+    }
+
+    .auth-header p {
+        font-size: 14px;
+        color: var(--auth-text-muted);
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    /* Mini Profil Özet Alanı */
+    .settings-profile-summary {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        background-color: var(--auth-input-bg);
+        border: 1px solid var(--auth-border);
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+    }
+
+    .settings-avatar-mini {
+        width: 45px;
+        height: 45px;
+        background-color: var(--auth-primary);
+        color: white !important;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .settings-summary-meta h3 {
+        margin: 0 0 4px 0;
+        font-size: 16px;
+        color: var(--auth-text-main);
+        font-weight: 600;
+    }
+
+    .badge-fav {
+        background-color: #fef3c7;
+        color: #d97706 !important;
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    body.dark-mode .badge-fav {
+        background-color: rgba(217, 119, 6, 0.2);
+        color: #fbbf24 !important;
+    }
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .auth-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .auth-input-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--auth-text-main);
+    }
+
+    .auth-input-wrapper {
+        position: relative;
+    }
+
+    .auth-input-wrapper > i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--auth-text-muted);
+        font-size: 15px;
+        transition: color 0.2s;
+        z-index: 2;
+    }
+
+    .auth-input-wrapper input {
+        width: 100%;
+        padding: 12px 42px 12px 42px;
+        border: 1px solid var(--auth-border);
+        border-radius: 10px;
+        outline: none;
+        font-size: 14px;
+        background-color: var(--auth-input-bg);
+        color: var(--auth-text-main);
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+
+    .auth-input-wrapper input:focus {
+        border-color: var(--auth-primary);
+        background-color: var(--auth-card-bg);
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    }
+
+    .auth-input-wrapper input:focus + i {
+        color: var(--auth-primary);
+    }
+
+    /* Şifre Göster/Gizle Butonları */
+    .password-toggle-btn {
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        padding: 8px 10px;
+        color: var(--auth-text-muted);
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+        transition: color 0.2s;
+    }
+    .password-toggle-btn:hover {
+        color: var(--auth-primary) !important;
+    }
+
+    .password-toggle-btn.password-visible .eye-main-icon::before {
+        content: "\f070"; /* Şifre görünürken fa-eye-slash ikonu */
+    }
+
+    /* Buton */
+    .btn-auth-submit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background-color: var(--auth-primary);
+        color: #ffffff !important;
+        border: none;
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.1s;
+        margin-top: 5px;
+    }
+
+    .btn-auth-submit:hover {
+        background-color: var(--auth-primary-hover) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-auth-submit:active {
+        transform: scale(0.98);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 5px;
+    }
+
+    /* Profile Geri Dönüş Linki */
+    .back-profile-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13.5px;
+        color: var(--auth-text-muted) !important;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .back-profile-link:hover {
+        color: var(--auth-primary) !important;
+        text-decoration: underline;
+    }
+
+    /* Giriş Animasyonu */
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+{% endblock %}

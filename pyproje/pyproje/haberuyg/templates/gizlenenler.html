@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<section class="hero">
+    <div>
+        <h2>Gizlenen Haberleriniz</h2>
+        <p>Burada daha önce gizlediğiniz haberleri yönetebilir ve tekrar görünür hale getirebilirsiniz.</p>
+    </div>
+</section>
+
+<div class="category-toolbar">
+    <div class="categories">
+        <a href="/">Ana Sayfaya Dön</a>
+    </div>
+</div>
+
+{% if articles|length == 0 %}
+    <div class="empty-box empty-news-state">
+        <h2>Gizlenmiş haber bulunamadı.</h2>
+        <p>Henüz hiçbir haberi gizlemediniz.</p>
+        <div class="empty-actions">
+            <a href="/">Tüm Haberlere Dön</a>
+        </div>
+    </div>
+{% endif %}
+
+<div class="news-container" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px; padding: 20px; width: 100%; box-sizing: border-box; clear: both;">
+    {% for article in articles %}
+        <div class="news-card" style="display: flex; flex-direction: column; background: #1e1e1e; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.3); padding: 15px; box-sizing: border-box; height: 100%;">
+            
+            {% if article.image %}
+                <img src="{{ article.image }}" onerror="this.src='/static/no-image.jpg'" alt="Haber Resmi" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">
+            {% endif %}
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span style="background: #e67e22; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">Gizli Haber</span>
+                </div>
+            </div>
+
+            <h3 style="font-size: 16px; margin: 0 0 10px 0; color: #fff; line-height: 1.4; font-weight: bold;">{{ article.title }}</h3>
+            
+            <p style="font-size: 13px; color: #aaa; line-height: 1.5; margin: 0 0 15px 0; flex-grow: 1;">
+                {% if article.description and article.description != "None" %}
+                    {{ article.description[:120] }}...
+                {% else %}
+                    Bu haber için kısa açıklama bulunmamaktadır.
+                {% endif %}
+            </p>
+
+            <div style="display: flex; flex-direction: column; width: 100%; gap: 10px; margin-top: auto; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;">
+    
+                <a href="{{ url_for('haber_detay', title=article.title, description=article.description, image=article.image, url=article.url) }}" style="display: block; width: 100%; background: #3498db; color: white; padding: 10px 0; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; text-align: center; box-sizing: border-box;">
+                    Detayları Gör
+                </a>
+
+                <form action="/unhide_article" method="POST" style="width: 100%; margin: 0;">
+                    <input type="hidden" name="url" value="{{ article.url }}">
+                    <button type="submit" style="width: 100%; background: #2ecc71; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px;">
+                        <i class="fa-solid fa-eye"></i> Gizlemeyi Kaldır
+                    </button>
+                </form>
+                
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
